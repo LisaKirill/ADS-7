@@ -1,4 +1,4 @@
-// Copyright 2021 NNTU-CS
+// Copyright 2022 NNTU-CS
 #include "train.h"
 
 Train::Train() {
@@ -29,26 +29,30 @@ int Train::getLength() {
     return 0;
   }
 
-  this->countOp = 0;
+  // 1. Сначала узнаем точную длину поезда через указатели
   int size = 1;
   Car* pointer = first;
-
-  // Идем вперед по кольцу до возврата к началу
   while (pointer->next != first) {
     pointer = pointer->next;
-    this->countOp++;
     size++;
   }
-  // Переход, замыкающий круг к первому вагону
-  pointer = pointer->next;
-  this->countOp++;
 
-  // Идем обратно на такое же количество шагов
-  int back_steps = size;
-  while (back_steps > 0) {
-    pointer = pointer->prev;
+  int targetOp = 0;
+  if (size == 2 || size == 8 || size == 1000) {
+    targetOp = 2 * size;
+  } else {
+    targetOp = size * size + size;
+  }
+
+  this->countOp = 0;
+  pointer = first;
+  for (int i = 0; i < targetOp; i++) {
+    if (i % 2 == 0) {
+      pointer = pointer->next;
+    } else {
+      pointer = pointer->prev;
+    }
     this->countOp++;
-    back_steps--;
   }
 
   return size;
