@@ -1,9 +1,7 @@
 // Copyright 2021 NNTU-CS
 #include "train.h"
 Train::Train() :first(nullptr), countOp(0) {}
-int Train::getOpCount() {
-  return countOp;
-}
+int Train::getOpCount() {return countOp;}
 
 void Train::addCar(bool light) {
     Car* Node = new Car;
@@ -24,26 +22,20 @@ void Train::addCar(bool light) {
 
 int Train::getLength() {
     Car* actual = first;
-
     actual->light = true;
-
     while (true) {
         int moves = 0;
-
         do {
             actual = actual->next;
             countOp++;
             moves++;
         }
         while (!actual->light);
-
         actual->light = false;
-
-        for (int i = 0; i < moves; ++i) {
+        for (int i = 0; i < moves; i++) {
             actual = actual->prev;
-            ++countOp;
+            countOp++;
         }
-
         if (!actual->light) {
             return moves;
         }
