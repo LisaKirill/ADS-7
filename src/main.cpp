@@ -1,69 +1,78 @@
 // Copyright 2022 NNTU-CS
 #include <iostream>
-#include <random>
 #include <fstream>
-#include <iomanip>
+#include <random>
+#include <filesystem>
+#include <cstdlib>
 #include "train.h"
 
-using namespace std;
-
-static Train buildTrain(int n, int mode, mt19937& gen) {
-    Train train;
-    uniform_int_distribution<int> bit(0, 1);
-
-    for (int i = 0; i < n; ++i) {
-        bool light = false;
-
-        if (mode == 0) {
-            light = false;
-        } else if (mode == 1) {
-            light = true;
-        } else {
-            light = bit(gen);
-        }
-
-        train.addCar(light);
-    }
-
-    return train;
-}
-
 int main() {
-    mt19937 gen(random_device{}());
+  std::filesystem::create_directories("result");
 
-    ofstream out("result/experiment.csv");
-    out << "n,all_off,all_on,random\n";
+  std::ofstream dataFile("result/metrics.csv");
+  if (!dataFile.is_open()) {
+    return 1;
+  }
+  dataFile << "Length,AllOff,AllOn,Random\n";
 
-    cout << setw(6) << "n"
-         << setw(12) << "off"
-         << setw(12) << "on"
-         << setw(12) << "rand" << '\n';
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_int_distribution<> distrib(0, 1);
 
-    for (int n = 2; n <= 60; ++n) {
-        Train tOff = buildTrain(n, 0, gen);
-        tOff.getLength();
-        int opOff = tOff.getOpCount();
-
-        Train tOn = buildTrain(n, 1, gen);
-        tOn.getLength();
-        int opOn = tOn.getOpCount();
-
-        long long sumRand = 0;
-        const int trials = 50;
-        for (int i = 0; i < trials; ++i) {
-            Train tRand = buildTrain(n, 2, gen);
-            tRand.getLength();
-            sumRand += tRand.getOpCount();
-        }
-        int opRand = static_cast<int>(sumRand / trials);
-
-        out << n << "," << opOff << "," << opOn << "," << opRand << "\n";
-
-        cout << setw(6) << n
-             << setw(12) << opOff
-             << setw(12) << opOn
-             << setw(12) << opRand << '\n';
+  for (int n = 10; n <= 400; n += 10) {
+    Train trainOff;
+    for (int i = 0; i < n; ++i) {
+      trainOff.addCar(false);
     }
+    trainOff.getLength();
+    int opsOff = trainOff.getOpCount();
 
-    return 0;
+    Train trainOn;
+    for (int i = 0; i < n; ++i) {
+      trainOn.addCar(true);
+    }
+    trainOn.getLength();
+    int opsOn = trainOn.getOpCount();
+
+    Train trainRand;
+    for (int i = 0; i < n; ++i) {
+      trainRand.addCar(distrib(gen) == 1);
+    }
+    trainRand.getLength();
+    int opsRand = trainRand.getOpCount();
+
+    dataFile << n << "," << opsOff << "," << opsOn << "," << opsRand << "\n";
+  }
+  dataFile.close();
+
+  std::ofstream scriptFile("result/build_plot.py");
+  if (scriptFile.is_open()) {
+    scriptFile << "import pandas as pd\n";
+    scriptFile << "import matplotlib.pyplot as plt\n";
+    scriptFile << "import numpy as np\n";
+    scriptFile << "df = pd.read_csv('result/metrics.csv')\n";
+    scriptFile << "n = df['Length']\n";
+    scriptFile << "plt.figure(figsize=(10, 6))\n";
+    scriptFile << "plt.scatter(n, df['AllOff'], color='blue', label='Off')\n";
+    scriptFile << "plt.scatter(n, df['AllOn'], color='red', label='On')\n";
+    scriptFile << "plt.scatter(n, df['Random'], color='green', label='Rand')\n";
+    scriptFile << "def t(x, y, c):\n";
+    scriptFile << "  z = np.polyfit(x, y, 2)\n";
+    scriptFile << "  p = np.poly1d(z)\n";
+    scriptFile << "  plt.plot(x, p(x), color=c, linestyle='--')\n";
+    scriptFile << "t(n, df['AllOff'], 'blue')\n";
+    scriptFile << "t(n, df['AllOn'], 'red')\n";
+    scriptFile << "t(n, df['Random'], 'green')\n";
+    scriptFile << "plt.grid(True)\n";
+    scriptFile << "plt.savefig('result/plot.png')\n";
+    scriptFile.close();
+  }
+
+#ifdef _WIN32
+  std::system("python result/build_plot.py");
+#else
+  std::system("python3 result/build_plot.py");
+#endif
+
+  return 0;
 }
