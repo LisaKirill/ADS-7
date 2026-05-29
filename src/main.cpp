@@ -6,7 +6,6 @@
 #include "train.h"
 
 int main() {
-  // Создаем папку через системный вызов и сохраняем результат, чтобы не было ошибок
 #ifdef _WIN32
   int dir_res = std::system("mkdir result 2>nul");
 #else
@@ -49,7 +48,8 @@ int main() {
     trainRand.getLength();
     int opsRand = trainRand.getOpCount();
 
-    dataFile << n << "," << opsOff << "," << opsOn << "," << opsRand << "\n";
+    dataFile << n << "," << opsOff << "," << opsOn << "," 
+             << opsRand << "\n";
   }
   dataFile.close();
 
@@ -65,7 +65,7 @@ int main() {
     scriptFile << "plt.scatter(n, df['AllOn'], color='red', label='On')\n";
     scriptFile << "plt.scatter(n, df['Random'], color='green', label='Rand')\n";
     scriptFile << "def t(x, y, c):\n";
-    scriptFile << "  z = np.polyfit(x, y, 2)\n";
+    scriptFile << "  z = np.polyfit(x, y, 1)\n";
     scriptFile << "  p = np.poly1d(z)\n";
     scriptFile << "  plt.plot(x, p(x), color=c, linestyle='--')\n";
     scriptFile << "t(n, df['AllOff'], 'blue')\n";
@@ -76,7 +76,6 @@ int main() {
     scriptFile.close();
   }
 
-  // Запускаем Python-скрипт и проверяем код возврата для удовлетворения -Werror
 #ifdef _WIN32
   int plot_res = std::system("python result/build_plot.py");
 #else
