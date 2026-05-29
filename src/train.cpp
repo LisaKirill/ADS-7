@@ -2,67 +2,68 @@
 #include "train.h"
 
 Train::Train() {
-    countOp = 0;
-    first = nullptr;
-}
-
-Train::~Train() {
-    if (!first) return;
-
-    Car* current = first->next;
-    while (current != first) {
-        Car* next = current->next;
-        delete current;
-        current = next;
-    }
-    delete first;
+  this->first = nullptr;
+  this->countOp = 0;
 }
 
 void Train::addCar(bool light) {
-    Car* newCar = new Car{light, nullptr, nullptr};
+  Car* element = new Car;
+  element->light = light;
 
-    if (!first) {
-        first = newCar;
-        first->next = first;
-        first->prev = first;
-    } else {
-        Car* last = first->prev;
-        last->next = newCar;
-        newCar->prev = last;
-        newCar->next = first;
-        first->prev = newCar;
-    }
+  if (first == nullptr) {
+    first = element;
+    element->next = element;
+    element->prev = element;
+    return;
+  }
+
+  Car* tail = first->prev;
+  element->next = first;
+  element->prev = tail;
+  tail->next = element;
+  first->prev = element;
 }
 
 int Train::getLength() {
-    if (!first) return 0;
+  if (first == nullptr) {
+    return 0;
+  }
 
-    countOp = 0;
-    Car* current = first;
-    current->light = true;
-    int k = 1;
+  this->countOp = 0;
+  Car* pointer = first;
+  pointer->light = true;
 
-    while (true) {
-        for (int i = 0; i < k; ++i) {
-            current = current->next;
-            ++countOp;
-        }
-
-        current->light = false;
-
-        for (int i = 0; i < k; ++i) {
-            current = current->prev;
-            ++countOp;
-        }
-
-        if (!current->light) {
-            return k;
-        }
-
-        ++k;
+  int current_size = 1;
+  while (pointer->light) {
+    // Смещение вперед на текущую предполагаемую длину (счетчик вверх)
+    int step_forward = 0;
+    while (step_forward < current_size) {
+      pointer = pointer->next;
+      this->countOp++;
+      step_forward++;
     }
+
+    // Выключение света в проверочном вагоне
+    pointer->light = false;
+
+    // Смещение обратно к исходной точке (счетчик вниз)
+    int step_backward = current_size;
+    while (step_backward > 0) {
+      pointer = pointer->prev;
+      this->countOp++;
+      step_backward--;
+    }
+
+    // Проверка: если свет в базовом вагоне погас, мы нашли длину
+    if (pointer->light == false) {
+      return current_size;
+    }
+
+    current_size++;
+  }
+  return current_size;
 }
 
 int Train::getOpCount() {
-    return countOp;
+  return this->countOp;
 }
