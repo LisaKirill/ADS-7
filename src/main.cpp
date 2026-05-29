@@ -2,12 +2,20 @@
 #include <iostream>
 #include <fstream>
 #include <random>
-#include <filesystem>
 #include <cstdlib>
-#include "train.h"
+#include "../include/train.h"
 
 int main() {
-  std::filesystem::create_directories("result");
+  // Создаем папку через системный вызов и сохраняем результат, чтобы не было ошибок
+#ifdef _WIN32
+  int dir_res = std::system("mkdir result 2>nul");
+#else
+  int dir_res = std::system("mkdir -p result");
+#endif
+
+  if (dir_res == -1) {
+    return 1;
+  }
 
   std::ofstream dataFile("result/metrics.csv");
   if (!dataFile.is_open()) {
@@ -68,11 +76,16 @@ int main() {
     scriptFile.close();
   }
 
+  // Запускаем Python-скрипт и проверяем код возврата для удовлетворения -Werror
 #ifdef _WIN32
-  std::system("python result/build_plot.py");
+  int plot_res = std::system("python result/build_plot.py");
 #else
-  std::system("python3 result/build_plot.py");
+  int plot_res = std::system("python3 result/build_plot.py");
 #endif
+
+  if (plot_res == -1) {
+    return 1;
+  }
 
   return 0;
 }
