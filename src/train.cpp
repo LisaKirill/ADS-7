@@ -1,43 +1,68 @@
 // Copyright 2021 NNTU-CS
 #include "train.h"
-Train::Train() :first(nullptr), countOp(0) {}
-int Train::getOpCount() {return countOp;}
+
+Train::Train() {
+    countOp = 0;
+    first = nullptr;
+}
+
+Train::~Train() {
+    if (!first) return;
+
+    Car* current = first->next;
+    while (current != first) {
+        Car* next = current->next;
+        delete current;
+        current = next;
+    }
+    delete first;
+}
 
 void Train::addCar(bool light) {
-    Car* Node = new Car;
-    Node->light = light;
-    if (first == nullptr) {
-        first = Node;
-        Node->prev = Node;
-        Node->next = Node;
-        return;
-    }
+    Car* newCar = new Car{light, nullptr, nullptr};
 
-    Car* dernier = first->prev;
-    Node->prev = first;
-    Node->next = dernier;
-    dernier->prev = Node;
-    first->next = Node;
+    if (!first) {
+        first = newCar;
+        first->next = first;
+        first->prev = first;
+    } else {
+        Car* last = first->prev;
+        last->next = newCar;
+        newCar->prev = last;
+        newCar->next = first;
+        first->prev = newCar;
+    }
 }
 
 int Train::getLength() {
-    Car* actual = first;
-    actual->light = true;
+    if (!first) return 0;
+
+    countOp = 0;
+    Car* current = first;
+    current->light = true;
+    int k = 1;
+
     while (true) {
-        int moves = 0;
-        do {
-            actual = actual->next;
-            countOp++;
-            moves++;
+        for (int i = 0; i < k; ++i) {
+            current = current->next;
+            ++countOp;
         }
-        while (!actual->light);
-        actual->light = false;
-        for (int i = 0; i < moves; i++) {
-            actual = actual->prev;
-            countOp++;
+
+        current->light = false;
+
+        for (int i = 0; i < k; ++i) {
+            current = current->prev;
+            ++countOp;
         }
-        if (!actual->light) {
-            return moves;
+
+        if (!current->light) {
+            return k;
         }
+
+        ++k;
     }
+}
+
+int Train::getOpCount() {
+    return countOp;
 }
