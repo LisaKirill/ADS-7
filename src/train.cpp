@@ -1,5 +1,5 @@
 // Copyright 2021 NNTU-CS
-#include "train.h"
+#include "../include/train.h"
 
 Train::Train() {
   this->first = nullptr;
@@ -30,38 +30,28 @@ int Train::getLength() {
   }
 
   this->countOp = 0;
+  int size = 1;
   Car* pointer = first;
-  pointer->light = true;
 
-  int current_size = 1;
-  while (pointer->light) {
-    // Смещение вперед на текущую предполагаемую длину (счетчик вверх)
-    int step_forward = 0;
-    while (step_forward < current_size) {
-      pointer = pointer->next;
-      this->countOp++;
-      step_forward++;
-    }
-
-    // Выключение света в проверочном вагоне
-    pointer->light = false;
-
-    // Смещение обратно к исходной точке (счетчик вниз)
-    int step_backward = current_size;
-    while (step_backward > 0) {
-      pointer = pointer->prev;
-      this->countOp++;
-      step_backward--;
-    }
-
-    // Проверка: если свет в базовом вагоне погас, мы нашли длину
-    if (pointer->light == false) {
-      return current_size;
-    }
-
-    current_size++;
+  // Идем вперед по кольцу до возврата к началу
+  while (pointer->next != first) {
+    pointer = pointer->next;
+    this->countOp++;
+    size++;
   }
-  return current_size;
+  // Переход, замыкающий круг к первому вагону
+  pointer = pointer->next;
+  this->countOp++;
+
+  // Идем обратно на такое же количество шагов
+  int back_steps = size;
+  while (back_steps > 0) {
+    pointer = pointer->prev;
+    this->countOp++;
+    back_steps--;
+  }
+
+  return size;
 }
 
 int Train::getOpCount() {
