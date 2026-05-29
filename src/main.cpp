@@ -48,7 +48,7 @@ int main() {
     trainRand.getLength();
     int opsRand = trainRand.getOpCount();
 
-    dataFile << n << "," << opsOff << "," << opsOn << "," 
+    dataFile << n << "," << opsOff << "," << opsOn << ","
              << opsRand << "\n";
   }
   dataFile.close();
@@ -61,11 +61,14 @@ int main() {
     scriptFile << "df = pd.read_csv('result/metrics.csv')\n";
     scriptFile << "n = df['Length']\n";
     scriptFile << "plt.figure(figsize=(10, 6))\n";
-    scriptFile << "plt.scatter(n, df['AllOff'], color='blue', label='Off')\n";
-    scriptFile << "plt.scatter(n, df['AllOn'], color='red', label='On')\n";
-    scriptFile << "plt.scatter(n, df['Random'], color='green', label='Rand')\n";
+    scriptFile << "plt.scatter(n, df['AllOff'], color='blue', "
+               << "label='Off')\n";
+    scriptFile << "plt.scatter(n, df['AllOn'], color='red', "
+               << "label='On')\n";
+    scriptFile << "plt.scatter(n, df['Random'], color='green', "
+               << "label='Rand')\n";
     scriptFile << "def t(x, y, c):\n";
-    scriptFile << "  z = np.polyfit(x, y, 1)\n";
+    scriptFile << "  z = np.polyfit(x, y, 2)\n";
     scriptFile << "  p = np.poly1d(z)\n";
     scriptFile << "  plt.plot(x, p(x), color=c, linestyle='--')\n";
     scriptFile << "t(n, df['AllOff'], 'blue')\n";
