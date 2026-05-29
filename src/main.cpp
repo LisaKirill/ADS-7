@@ -6,7 +6,7 @@
 
 int main() {
   std::srand(time(nullptr));
-  std::cout << "n\tfalse\ttrue\trandom" << std::endl;
+  std::cout << "n\tfalse\ttrue\trandom"<<"\n";
   for (int n = 2; n <= 100; n++) {
     int F;
     int T;
@@ -34,8 +34,7 @@ int main() {
       train.getLength();
       R = train.getOpCount();
     }
-    std::cout << n << "\t" << F << "\t" << T << "\t" << R
-              << std::endl;
+    std::cout << n << "\t" << F << "\t" << T << "\t" << R<<"\n";
   }
   return 0;
 }
