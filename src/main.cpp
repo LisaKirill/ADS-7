@@ -3,7 +3,7 @@
 #include <fstream>
 #include <random>
 #include <cstdlib>
-#include "../include/train.h"
+#include "train.h"
 
 int main() {
   // Создаем папку через системный вызов и сохраняем результат, чтобы не было ошибок
